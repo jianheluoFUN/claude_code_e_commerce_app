@@ -20,13 +20,13 @@ export default async function StorePage(
 
     const supabase = await createClient()
 
-    // Fetch store from "store" table based on "slug"
+    // Fetch store from "store" table based on "slug" and then populate the owner data
     const {data: store} = await supabase
         .from("stores")
         .select(`
-      *,
-      owner:profiles(full_name)
-    `)
+            *,
+            owner:profiles(full_name)
+        `)
         .eq("slug", slug)
         .eq("status", "approved")
         .single()
@@ -35,7 +35,7 @@ export default async function StorePage(
         notFound()
     }
 
-    // Fetch store products
+    // Fetch store products from "products" table based on "store_id"
     const {data: products} = await supabase
         .from("products")
         .select("*")
@@ -46,7 +46,7 @@ export default async function StorePage(
     return (
         <div>
             {/* Store Header */}
-            <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 relative">
+            <div className="h-64 md:h-72 bg-gradient-to-br from-primary/20 to-secondary/20 relative">
                 {store.banner_url && (
                     <Image
                         src={store.banner_url}
@@ -58,22 +58,22 @@ export default async function StorePage(
             </div>
 
             <div className="container">
-                <div className="flex items-end gap-6 -mt-16 mb-8">
+                <div className="flex items-end gap-6 -mt-20 mb-8 relative z-10">
                     <div
-                        className="h-32 w-32 rounded-full bg-muted flex items-center justify-center border-4 border-background">
+                        className="h-32 w-32 md:h-40 md:w-40 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-lg overflow-hidden shrink-0">
                         {store.logo_url ? (
                             <Image
                                 src={store.logo_url}
                                 alt={store.name}
-                                width={128}
-                                height={128}
-                                className="rounded-full"
+                                width={160}
+                                height={160}
+                                className="rounded-full object-cover w-full h-full"
                             />
                         ) : (
                             <Store className="h-16 w-16 text-muted-foreground"/>
                         )}
                     </div>
-                    <div className="pb-2">
+                    <div className="pb-4">
                         <h1 className="text-3xl font-bold">{store.name}</h1>
                         <p className="text-muted-foreground">by {store.owner?.full_name || "Unknown"}</p>
                     </div>
