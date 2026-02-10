@@ -1,3 +1,10 @@
+
+/*
+    There are three roles:
+            - admin
+            - store_owner
+            - buyer
+ */
 export type UserRole = 'admin' | 'store_owner' | 'buyer'
 
 export type StoreStatus = 'pending' | 'approved' | 'suspended'
@@ -8,6 +15,7 @@ export type OrderStatus = 'pending' | 'paid' | 'confirmed' | 'shipped' | 'delive
 
 export type ReviewStatus = 'visible' | 'hidden' | 'flagged'
 
+// Define the interface for record in "profiles" table
 export interface Profile {
     id: string
     email: string
@@ -18,6 +26,7 @@ export interface Profile {
     updated_at: string
 }
 
+// Define the interface for record in "profiles" table
 export interface Store {
     id: string
     owner_id: string
@@ -32,6 +41,7 @@ export interface Store {
     owner?: Profile
 }
 
+// Define the interface for record in "categories" table
 export interface Category {
     id: string
     name: string
@@ -40,14 +50,19 @@ export interface Category {
     created_at: string
 }
 
+// Define the interface for record in "products" table
 export interface Product {
     id: string
+
+    // association with "stores" table
     store_id: string
     name: string
     slug: string
     description: string | null
     price: number
     compare_price: number | null
+
+    // association with "categories" table
     category_id: string | null
     images: string[]
     inventory_count: number
@@ -57,6 +72,7 @@ export interface Product {
 
     // each product will have a foreign key to the "stores" table
     store?: Store
+
     category?: Category
 }
 
@@ -64,11 +80,14 @@ export interface Order {
     id: string
     buyer_id: string
     store_id: string
+
     status: OrderStatus
+
     total_amount: number
     shipping_address: ShippingAddress
     created_at: string
     updated_at: string
+
     buyer?: Profile
     store?: Store
 
@@ -89,6 +108,8 @@ export interface ShippingAddress {
 
 export interface OrderItem {
     id: string
+
+    // association with "orders"
     order_id: string
     product_id: string
     quantity: number

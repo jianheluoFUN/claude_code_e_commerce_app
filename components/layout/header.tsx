@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import {useRouter} from "next/navigation"
-import {ShoppingCart, User, Store, LogOut, LayoutDashboard, Settings} from "lucide-react"
+import {ShoppingCart, User, Store, LogOut, LayoutDashboard, Settings, Shield, ShoppingBag} from "lucide-react"
 import {createClient} from "@/lib/supabase/client"
 import {Button} from "@/components/ui/button"
 import {
@@ -14,7 +14,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
-import type {Profile} from "@/lib/types"
+import {Badge} from "@/components/ui/badge"
+import type {Profile, UserRole} from "@/lib/types"
+
+const roleConfig: Record<UserRole, {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    icon: React.ReactNode
+}> = {
+    admin: {label: "Admin", variant: "destructive", icon: <Shield className="h-3 w-3"/>},
+    store_owner: {label: "Store Owner", variant: "default", icon: <Store className="h-3 w-3"/>},
+    buyer: {label: "Buyer", variant: "secondary", icon: <ShoppingBag className="h-3 w-3"/>},
+}
 
 interface HeaderProps {
     user: Profile | null
@@ -35,6 +46,7 @@ export function Header(
 
         await supabase.auth.signOut()
 
+        // reroute to "/" routing
         router.push("/")
         router.refresh()
     }
@@ -89,10 +101,16 @@ export function Header(
 
                                 <DropdownMenuContent className="w-56" align="end" forceMount>
                                     <DropdownMenuLabel className="font-normal">
-                                        <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium leading-none">
-                                                {user.full_name || "User"}
-                                            </p>
+                                        <div className="flex flex-col space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-medium leading-none">
+                                                    {user.full_name || "User"}
+                                                </p>
+                                                <Badge variant={roleConfig[user.role].variant} className="flex items-center gap-1 text-xs">
+                                                    {roleConfig[user.role].icon}
+                                                    {roleConfig[user.role].label}
+                                                </Badge>
+                                            </div>
                                             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                                         </div>
                                     </DropdownMenuLabel>
@@ -105,6 +123,7 @@ export function Header(
                                             </Link>
                                         </DropdownMenuItem>
                                     )}
+                                    {/* conditional rendering */}
                                     {user.role === "admin" && (
                                         <DropdownMenuItem asChild>
                                             <Link href="/admin">
