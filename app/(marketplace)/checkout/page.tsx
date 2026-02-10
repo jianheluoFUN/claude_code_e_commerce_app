@@ -59,6 +59,7 @@ export default function CheckoutPage() {
                 } = await supabase.auth.getUser()
 
                 if (!user) {
+                    // redirect to "/login?redirect=/checkout" routing
                     router.push("/login?redirect=/checkout")
                     return
                 }
@@ -201,7 +202,15 @@ export default function CheckoutPage() {
         <div className="container py-8">
             <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
-            <form onSubmit={handleSubmit}>
+
+            {/*
+                form section
+
+                The callback function is "handleSubmit"
+            */}
+            <form
+                onSubmit={handleSubmit}
+            >
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Shipping Form */}
                     <div className="lg:col-span-2">
@@ -212,19 +221,28 @@ export default function CheckoutPage() {
                                     Enter your shipping details. You&apos;ll be redirected to Stripe for secure payment.
                                 </CardDescription>
                             </CardHeader>
+
                             <CardContent className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-4">
+
+                                    {/* input section for the full_name */}
                                     <div className="space-y-2">
                                         <Label htmlFor="full_name">Full Name</Label>
                                         <Input
                                             id="full_name"
                                             value={formData.full_name}
                                             onChange={(e) =>
-                                                setFormData({...formData, full_name: e.target.value})
+                                                setFormData(
+                                                    {
+                                                        ...formData,
+                                                        full_name: e.target.value
+                                                    }
+                                                )
                                             }
                                             required
                                         />
                                     </div>
+                                    {/* input section for the phone */}
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">Phone</Label>
                                         <Input
@@ -238,6 +256,7 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
 
+                                {/* input section for the address_line1 */}
                                 <div className="space-y-2">
                                     <Label htmlFor="address_line1">Address Line 1</Label>
                                     <Input
@@ -250,6 +269,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
 
+                                {/* input section for the address_line2 */}
                                 <div className="space-y-2">
                                     <Label htmlFor="address_line2">Address Line 2 (Optional)</Label>
                                     <Input
@@ -262,6 +282,7 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">
+                                    {/* input section for the city */}
                                     <div className="space-y-2">
                                         <Label htmlFor="city">City</Label>
                                         <Input
@@ -273,6 +294,7 @@ export default function CheckoutPage() {
                                             required
                                         />
                                     </div>
+                                    {/* input section for the state */}
                                     <div className="space-y-2">
                                         <Label htmlFor="state">State/Province</Label>
                                         <Input
@@ -287,6 +309,7 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">
+                                    {/* input section for the postal_code */}
                                     <div className="space-y-2">
                                         <Label htmlFor="postal_code">Postal Code</Label>
                                         <Input
@@ -298,6 +321,8 @@ export default function CheckoutPage() {
                                             required
                                         />
                                     </div>
+
+                                    {/* input section for the country */}
                                     <div className="space-y-2">
                                         <Label htmlFor="country">Country</Label>
                                         <select
@@ -350,14 +375,18 @@ export default function CheckoutPage() {
                                 <CardTitle>Order Summary</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {cartItems.map((item) => (
-                                    <div key={item.id} className="flex gap-3">
+
+                                {/* By using the "map" function to iterate over the "cartItems" array */}
+                                {cartItems.map((cartItem) => (
+                                    <div key={cartItem.id} className="flex gap-3">
                                         <div
                                             className="h-16 w-16 bg-muted rounded-md overflow-hidden relative shrink-0">
-                                            {item.product?.images?.[0] && (
+
+                                            {/* conditional rendering */}
+                                            {cartItem.product?.images?.[0] && (
                                                 <Image
-                                                    src={item.product.images[0]}
-                                                    alt={item.product.name}
+                                                    src={cartItem.product.images[0]}
+                                                    alt={cartItem.product.name}
                                                     fill
                                                     className="object-cover"
                                                 />
@@ -365,14 +394,14 @@ export default function CheckoutPage() {
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium line-clamp-1">
-                                                {item.product?.name}
+                                                {cartItem.product?.name}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                Qty: {item.quantity}
+                                                Qty: {cartItem.quantity}
                                             </p>
                                         </div>
                                         <p className="text-sm font-medium">
-                                            {formatPrice((item.product?.price || 0) * item.quantity)}
+                                            {formatPrice((cartItem.product?.price || 0) * cartItem.quantity)}
                                         </p>
                                     </div>
                                 ))}
@@ -380,7 +409,9 @@ export default function CheckoutPage() {
                                 <div className="border-t pt-4 space-y-2">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Subtotal</span>
-                                        <span>{formatPrice(subtotal)}</span>
+                                        <span>
+                                            {formatPrice(subtotal)}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Shipping</span>
@@ -388,7 +419,9 @@ export default function CheckoutPage() {
                                     </div>
                                     <div className="flex justify-between font-semibold text-lg pt-2 border-t">
                                         <span>Total</span>
-                                        <span>{formatPrice(subtotal)}</span>
+                                        <span>
+                                            {formatPrice(subtotal)}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -398,6 +431,7 @@ export default function CheckoutPage() {
                                     </div>
                                 )}
                             </CardContent>
+
                             <CardFooter className="flex-col gap-3">
                                 <Button
                                     type="submit"
@@ -405,6 +439,7 @@ export default function CheckoutPage() {
                                     size="lg"
                                     disabled={submitting}
                                 >
+                                    {/* conditional rendering */}
                                     {submitting ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
@@ -417,6 +452,7 @@ export default function CheckoutPage() {
                                         </>
                                     )}
                                 </Button>
+
                                 <p className="text-xs text-center text-muted-foreground">
                                     By placing your order, you agree to our Terms of Service and Privacy Policy.
                                 </p>
