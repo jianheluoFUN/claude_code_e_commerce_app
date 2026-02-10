@@ -21,12 +21,20 @@ interface HeaderProps {
 }
 
 // This is the component for the header
-export function Header({user}: HeaderProps) {
+export function Header(
+    {
+        user
+    }: HeaderProps
+) {
     const router = useRouter()
 
+    // callback handler to logout
     const handleLogout = async () => {
+
         const supabase = createClient()
+
         await supabase.auth.signOut()
+
         router.push("/")
         router.refresh()
     }
@@ -36,15 +44,19 @@ export function Header({user}: HeaderProps) {
             className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center gap-6">
+                    {/* Link to "/" routing */}
                     <Link href="/" className="flex items-center gap-2">
                         <Store className="h-6 w-6"/>
                         <span className="font-bold text-xl">Marketplace</span>
                     </Link>
                     <nav className="hidden md:flex items-center gap-6">
+                        {/* Link to "/products" routing */}
                         <Link href="/products"
                               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Products
                         </Link>
+
+                        {/* Link to "/stores" routing */}
                         <Link href="/stores"
                               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Stores
@@ -53,8 +65,10 @@ export function Header({user}: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    {/* conditional rendering */}
                     {user ? (
                         <>
+                            {/* Link to "/cart" routing */}
                             <Link href="/cart">
                                 <Button variant="ghost" size="icon">
                                     <ShoppingCart className="h-5 w-5"/>
@@ -66,15 +80,19 @@ export function Header({user}: HeaderProps) {
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src={user.avatar_url || undefined} alt={user.full_name || ""}/>
                                             <AvatarFallback>
+                                                {/* conditional rendering */}
                                                 {user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
+
                                 <DropdownMenuContent className="w-56" align="end" forceMount>
                                     <DropdownMenuLabel className="font-normal">
                                         <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium leading-none">{user.full_name || "User"}</p>
+                                            <p className="text-sm font-medium leading-none">
+                                                {user.full_name || "User"}
+                                            </p>
                                             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                                         </div>
                                     </DropdownMenuLabel>
