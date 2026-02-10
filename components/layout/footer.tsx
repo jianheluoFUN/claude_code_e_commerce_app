@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Store } from "lucide-react"
 
+// This is the component for the header
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">

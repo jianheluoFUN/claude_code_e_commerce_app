@@ -63,8 +63,9 @@ export default async function CartPage() {
                     {/* Cart Items */}
                     <div className="lg:col-span-2 space-y-6">
 
-                        {
-                            Object.entries(itemsByStore || {}).map(([storeSlug, {storeName, items}]) => (
+                        {Object.entries(itemsByStore || {}).map(  ([storeSlug, storeData]) => {
+                            const { storeName, items } = storeData as { storeName: string; storeSlug?: string; items: typeof cartItems }
+                            return (
                                 <Card key={storeSlug}>
                                     <CardHeader className="pb-3">
                                         <CardTitle className="text-lg">
@@ -82,7 +83,8 @@ export default async function CartPage() {
                                         ))}
                                     </CardContent>
                                 </Card>
-                            ))}
+                            )
+                        })}
                     </div>
 
                     {/* Order Summary */}
