@@ -4,7 +4,7 @@ import {useState, useEffect} from "react"
 import {useRouter, useParams} from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import {ArrowLeft, Loader2, Plus, X} from "lucide-react"
+import {ArrowLeft, Loader2, Plus, X, ExternalLink} from "lucide-react"
 import {createClient} from "@/lib/supabase/client"
 import {slugify} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
@@ -211,7 +211,17 @@ export default function EditProductPage() {
                 Back to Products
             </Link>
 
-            <h1 className="text-3xl font-bold mb-8">Edit Product</h1>
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold">Edit Product</h1>
+                <Link
+                    href={`/products/${formData.slug}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                    <ExternalLink className="h-4 w-4"/>
+                    View Product Page
+                </Link>
+            </div>
 
             {/* The form submission will trigger the "handleSubmit" function */}
             <form
