@@ -48,6 +48,7 @@ export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectP
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="pending">Pending</SelectItem>
+        <SelectItem value="paid">Paid</SelectItem>
         <SelectItem value="confirmed">Confirmed</SelectItem>
         <SelectItem value="shipped">Shipped</SelectItem>
         <SelectItem value="delivered">Delivered</SelectItem>

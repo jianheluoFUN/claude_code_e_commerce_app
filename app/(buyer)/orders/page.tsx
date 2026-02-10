@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 
 const statusColors = {
   pending: "warning",
+  paid: "success",
   confirmed: "default",
   shipped: "default",
   delivered: "success",

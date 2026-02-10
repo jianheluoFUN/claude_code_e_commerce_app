@@ -16,6 +16,7 @@ import { OrderStatusSelect } from "@/components/orders/order-status-select"
 
 const statusColors = {
   pending: "warning",
+  paid: "success",
   confirmed: "default",
   shipped: "default",
   delivered: "success",

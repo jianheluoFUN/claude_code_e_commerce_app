@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Loader2, CheckCircle } from "lucide-react"
+import { Loader2, CreditCard, Lock } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { formatPrice } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import type { CartItem, Product, Store } from "@/lib/types"
 
 interface CartItemWithProduct extends CartItem {
@@ -21,8 +21,8 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     full_name: "",
     address_line1: "",
@@ -30,7 +30,7 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     postal_code: "",
-    country: "",
+    country: "US",
     phone: "",
   })
 
@@ -86,110 +86,62 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    setError(null)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      router.push("/login")
-      return
-    }
-
-    // Group items by store
-    const itemsByStore = cartItems.reduce((acc, item) => {
-      const storeId = item.product.store_id
-      if (!acc[storeId]) {
-        acc[storeId] = []
-      }
-      acc[storeId].push(item)
-      return acc
-    }, {} as Record<string, CartItemWithProduct[]>)
-
-    // Create orders for each store
-    for (const [storeId, items] of Object.entries(itemsByStore)) {
-      const orderTotal = items.reduce(
-        (sum, item) => sum + item.product.price * item.quantity,
-        0
-      )
-
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          buyer_id: user.id,
-          store_id: storeId,
-          total_amount: orderTotal,
-          shipping_address: formData,
-          status: "pending",
-        })
-        .select()
-        .single()
-
-      if (orderError) {
-        console.error("Error creating order:", orderError)
-        setSubmitting(false)
-        return
-      }
-
-      // Create order items
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.product_id,
+    try {
+      // Prepare items for Stripe checkout
+      const items = cartItems.map((item) => ({
+        productId: item.product_id,
+        name: item.product.name,
+        price: item.product.price,
         quantity: item.quantity,
-        unit_price: item.product.price,
-        total_price: item.product.price * item.quantity,
+        image: item.product.images?.[0] || undefined,
       }))
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems)
+      // Create Stripe checkout session
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+          shippingAddress: {
+            line1: formData.address_line1,
+            line2: formData.address_line2 || undefined,
+            city: formData.city,
+            state: formData.state,
+            postal_code: formData.postal_code,
+            country: formData.country,
+            name: formData.full_name,
+            phone: formData.phone || undefined,
+          },
+        }),
+      })
 
-      if (itemsError) {
-        console.error("Error creating order items:", itemsError)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create checkout session")
       }
 
-      // Update product inventory
-      for (const item of items) {
-        await supabase
-          .from("products")
-          .update({
-            inventory_count: item.product.inventory_count - item.quantity,
-          })
-          .eq("id", item.product_id)
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error("No checkout URL received")
       }
+    } catch (err) {
+      console.error("Checkout error:", err)
+      setError(err instanceof Error ? err.message : "An error occurred")
+      setSubmitting(false)
     }
-
-    // Clear cart
-    await supabase.from("cart_items").delete().eq("buyer_id", user.id)
-
-    setSuccess(true)
-    setSubmitting(false)
   }
 
   if (loading) {
     return (
       <div className="container py-16 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  if (success) {
-    return (
-      <div className="container py-16 text-center">
-        <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Order Placed Successfully!</h1>
-        <p className="text-muted-foreground mb-8">
-          Thank you for your purchase. You will receive a confirmation email shortly.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/orders">
-            <Button>View Orders</Button>
-          </Link>
-          <Link href="/products">
-            <Button variant="outline">Continue Shopping</Button>
-          </Link>
-        </div>
       </div>
     )
   }
@@ -205,6 +157,9 @@ export default function CheckoutPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Shipping Address</CardTitle>
+                <CardDescription>
+                  Enter your shipping details. You&apos;ll be redirected to Stripe for secure payment.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
@@ -294,14 +249,42 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
-                    <Input
+                    <select
                       id="country"
                       value={formData.country}
                       onChange={(e) =>
                         setFormData({ ...formData, country: e.target.value })
                       }
                       required
-                    />
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                      <option value="GB">United Kingdom</option>
+                      <option value="AU">Australia</option>
+                    </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Info Card */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                  <Lock className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Secure Payment via Stripe</p>
+                    <p className="text-sm text-muted-foreground">
+                      You&apos;ll be redirected to Stripe&apos;s secure checkout to complete your payment.
+                      We accept all major credit cards.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -355,8 +338,14 @@ export default function CheckoutPage() {
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                 </div>
+
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex-col gap-3">
                 <Button
                   type="submit"
                   className="w-full"
@@ -366,12 +355,18 @@ export default function CheckoutPage() {
                   {submitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
+                      Redirecting to Payment...
                     </>
                   ) : (
-                    "Place Order"
+                    <>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Pay with Stripe
+                    </>
                   )}
                 </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  By placing your order, you agree to our Terms of Service and Privacy Policy.
+                </p>
               </CardFooter>
             </Card>
           </div>

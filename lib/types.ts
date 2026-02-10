@@ -4,7 +4,7 @@ export type StoreStatus = 'pending' | 'approved' | 'suspended'
 
 export type ProductStatus = 'draft' | 'active' | 'archived'
 
-export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+export type OrderStatus = 'pending' | 'paid' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
 
 export type ReviewStatus = 'visible' | 'hidden' | 'flagged'
 
