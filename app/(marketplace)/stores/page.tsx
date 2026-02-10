@@ -29,7 +29,7 @@ export default async function StoresPage() {
                     {stores.map((store) => (
                         <Link key={store.id} href={`/stores/${store.slug}`}>
                             <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
-                                <div className="h-32 bg-gradient-to-br from-primary/20 to-secondary/20 relative">
+                                <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/20 relative">
                                     {store.banner_url && (
                                         <Image
                                             src={store.banner_url}
@@ -39,23 +39,23 @@ export default async function StoresPage() {
                                         />
                                     )}
                                 </div>
-                                <CardContent className="p-6">
-                                    <div className="flex items-start gap-4">
+                                <CardContent className="p-6 pt-0">
+                                    <div className="flex items-start gap-4 -mt-10 relative z-10">
                                         <div
-                                            className="h-16 w-16 rounded-full bg-muted flex items-center justify-center shrink-0 -mt-12 border-4 border-background">
+                                            className="h-20 w-20 rounded-full bg-muted flex items-center justify-center shrink-0 border-4 border-background shadow-lg overflow-hidden">
                                             {store.logo_url ? (
                                                 <Image
                                                     src={store.logo_url}
                                                     alt={store.name}
-                                                    width={64}
-                                                    height={64}
-                                                    className="rounded-full"
+                                                    width={80}
+                                                    height={80}
+                                                    className="rounded-full object-cover w-full h-full"
                                                 />
                                             ) : (
                                                 <Store className="h-8 w-8 text-muted-foreground"/>
                                             )}
                                         </div>
-                                        <div className="flex-1 pt-2">
+                                        <div className="flex-1 pt-12">
                                             <h3 className="font-semibold text-lg">{store.name}</h3>
                                             <p className="text-sm text-muted-foreground">
                                                 by {store.owner?.full_name || "Unknown"}
