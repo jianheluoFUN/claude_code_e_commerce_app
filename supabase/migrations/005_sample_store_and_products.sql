@@ -23,6 +23,8 @@ ON CONFLICT (slug) DO UPDATE SET
     description = EXCLUDED.description,
     updated_at = NOW();
 
+
+
 -- Get the store ID for products
 DO $$
 DECLARE
@@ -55,7 +57,7 @@ BEGIN
         RETURNING id INTO audio_cat;
     END IF;
 
-    -- Insert sample products
+    -- Insert sample products (use ON CONFLICT with composite key: store_id, slug)
     -- Product 1: Wireless Earbuds
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
     VALUES (
@@ -73,7 +75,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 2: Mechanical Keyboard
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -92,7 +94,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 3: Wireless Mouse
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -111,7 +113,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 4: USB-C Hub
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -130,7 +132,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 5: Laptop Stand
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -149,7 +151,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 6: Webcam
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -168,7 +170,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 7: Portable Charger
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -187,7 +189,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 8: Monitor Light Bar
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -206,7 +208,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 9: Bluetooth Speaker
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -225,7 +227,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 10: Wireless Charging Pad
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -244,7 +246,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 11: Desk Mat
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -263,7 +265,7 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
     -- Product 12: Cable Management Kit
     INSERT INTO public.products (id, store_id, name, slug, description, price, compare_price, category_id, images, inventory_count, status, created_at, updated_at)
@@ -282,6 +284,6 @@ BEGIN
         NOW(),
         NOW()
     )
-    ON CONFLICT (slug) DO NOTHING;
+    ON CONFLICT (store_id, slug) DO NOTHING;
 
 END $$;
