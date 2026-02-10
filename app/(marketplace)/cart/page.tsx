@@ -129,7 +129,7 @@ export default async function CartPage() {
                                                             // introduce the "CartItemRow" component
                                                             <CartItemRow
                                                                 key={item.id}
-                                                                item={item}
+                                                                cartItem={item}
                                                             />
                                                         )
                                                     )
