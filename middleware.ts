@@ -17,6 +17,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Skip for API webhooks (Stripe, etc.) - they have their own authentication
+  if (request.nextUrl.pathname.startsWith('/api/webhooks')) {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request,
   })
