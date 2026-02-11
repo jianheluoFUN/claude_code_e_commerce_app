@@ -43,6 +43,8 @@ export function Header(
     // callback handler to logout
     const handleLogout = async () => {
 
+        console.log(`[Header] handleLogout function is called`)
+
         const supabase = createClient()
 
         await supabase.auth.signOut()
@@ -104,7 +106,8 @@ export function Header(
                                                 <p className="text-sm font-medium leading-none">
                                                     {user.full_name || "User"}
                                                 </p>
-                                                <Badge variant={roleConfig[user.role].variant} className="flex items-center gap-1 text-xs">
+                                                <Badge variant={roleConfig[user.role].variant}
+                                                       className="flex items-center gap-1 text-xs">
                                                     {roleConfig[user.role].icon}
                                                     {roleConfig[user.role].label}
                                                 </Badge>
