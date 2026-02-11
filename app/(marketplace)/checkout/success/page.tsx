@@ -7,7 +7,7 @@ import {CheckCircle, Loader2, Package} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
 
-// configure the "success_url" when creating the
+// configure the "success_url" when creating the stripe session
 export default function CheckoutSuccessPage() {
 
     const searchParams = useSearchParams()

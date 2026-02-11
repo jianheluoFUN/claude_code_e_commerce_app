@@ -181,6 +181,7 @@ export async function POST(
                 },
             }
         )
+        console.log(`[POST /api/checkout] session: ${JSON.stringify(session)}`)
 
         return NextResponse.json({
             sessionId: session.id,
