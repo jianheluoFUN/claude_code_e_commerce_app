@@ -1,9 +1,8 @@
 "use client"
 
 import {useState} from "react"
-import {useRouter} from "next/navigation"
-import {Minus, Plus, ShoppingCart, Loader2} from "lucide-react"
-import {createClient} from "@/lib/supabase/client"
+import {Minus, Plus, ShoppingCart, Loader2, Check} from "lucide-react"
+import {useCart} from "@/contexts/cart-context"
 import {Button} from "@/components/ui/button"
 import type {Product} from "@/lib/types"
 
@@ -12,86 +11,54 @@ interface AddToCartButtonProps {
 }
 
 // This is the component to add to shopping cart
-export function AddToCartButton(
-    {
-        product
-    }: AddToCartButtonProps
-) {
-
-    const router = useRouter()
+// Now works with both guest (localStorage) and authenticated (database) users
+export function AddToCartButton({product}: AddToCartButtonProps) {
+    const {addToCart, items} = useCart()
     const [quantity, setQuantity] = useState(1)
     const [loading, setLoading] = useState(false)
+    const [justAdded, setJustAdded] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Check current quantity in cart
+    const existingCartItem = items.find(item => item.productId === product.id)
+    const currentCartQuantity = existingCartItem?.quantity || 0
 
     const handleAddToCart = async () => {
         setLoading(true)
         setError(null)
 
-        const supabase = createClient()
-
-        // Check if user is logged in
-        const {data: {user}} = await supabase.auth.getUser()
-
-        if (!user) {
-            router.push(`/login?redirect=/products/${product.slug}`)
+        // Check if adding this quantity would exceed stock
+        if (currentCartQuantity + quantity > product.inventory_count) {
+            setError("Not enough stock available")
+            setLoading(false)
             return
         }
 
-        // Check if item already in cart
-        const {data: existingItem} = await supabase
-            .from("cart_items")
-            .select("id, quantity")
-            .eq("buyer_id", user.id)
-            .eq("product_id", product.id)
-            .single()
-
-        if (existingItem) {
-            // Update quantity
-            const newQuantity = existingItem.quantity + quantity
-            if (newQuantity > product.inventory_count) {
-                setError("Not enough stock available")
-                setLoading(false)
-                return
-            }
-
-            const {error: updateError} = await supabase
-                .from("cart_items")
-                .update({quantity: newQuantity})
-                .eq("id", existingItem.id)
-
-            if (updateError) {
-                setError(updateError.message)
-                setLoading(false)
-                return
-            }
-        } else {
-            // Add new item
-            const {error: insertError} = await supabase
-                .from("cart_items")
-                .insert({
-                    buyer_id: user.id,
-                    product_id: product.id,
-                    quantity,
-                })
-
-            if (insertError) {
-                setError(insertError.message)
-                setLoading(false)
-                return
-            }
+        try {
+            await addToCart(product.id, quantity)
+            setJustAdded(true)
+            setQuantity(1) // Reset quantity after adding
+            setTimeout(() => setJustAdded(false), 2000)
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to add to cart")
+        } finally {
+            setLoading(false)
         }
-
-        setLoading(false)
-        router.refresh()
-        // Could add a toast notification here
     }
 
     const isOutOfStock = product.inventory_count === 0
+    const maxQuantity = product.inventory_count - currentCartQuantity
 
     return (
         <div className="space-y-4">
             {error && (
                 <p className="text-sm text-red-500">{error}</p>
+            )}
+
+            {currentCartQuantity > 0 && (
+                <p className="text-sm text-muted-foreground">
+                    {currentCartQuantity} already in your cart
+                </p>
             )}
 
             <div className="flex items-center gap-4">
@@ -110,8 +77,8 @@ export function AddToCartButton(
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => setQuantity(Math.min(product.inventory_count, quantity + 1))}
-                        disabled={quantity >= product.inventory_count || isOutOfStock}
+                        onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
+                        disabled={quantity >= maxQuantity || isOutOfStock}
                     >
                         <Plus className="h-4 w-4"/>
                     </Button>
@@ -119,16 +86,27 @@ export function AddToCartButton(
 
                 <Button
                     onClick={handleAddToCart}
-                    disabled={loading || isOutOfStock}
+                    disabled={loading || isOutOfStock || maxQuantity <= 0}
                     className="flex-1 gap-2"
                     size="lg"
+                    variant={justAdded ? "secondary" : "default"}
                 >
                     {loading ? (
-                        <Loader2 className="h-5 w-5 animate-spin"/>
+                        <>
+                            <Loader2 className="h-5 w-5 animate-spin"/>
+                            Adding...
+                        </>
+                    ) : justAdded ? (
+                        <>
+                            <Check className="h-5 w-5"/>
+                            Added to Cart
+                        </>
                     ) : (
-                        <ShoppingCart className="h-5 w-5"/>
+                        <>
+                            <ShoppingCart className="h-5 w-5"/>
+                            {isOutOfStock ? "Out of Stock" : maxQuantity <= 0 ? "Max in Cart" : "Add to Cart"}
+                        </>
                     )}
-                    {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </Button>
             </div>
         </div>

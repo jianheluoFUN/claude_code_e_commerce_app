@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Badge} from "@/components/ui/badge"
+import {CartIcon} from "@/components/cart/cart-icon"
 import type {Profile, UserRole} from "@/lib/types"
 
 const roleConfig: Record<UserRole, {
@@ -77,15 +78,12 @@ export function Header(
                 </div>
 
                 <div className="flex items-center gap-4">
+                    {/* Cart icon - shown for all users (guest and authenticated) */}
+                    <CartIcon/>
+
                     {/* conditional rendering */}
                     {user ? (
                         <>
-                            {/* Link to "/cart" routing */}
-                            <Link href="/cart">
-                                <Button variant="ghost" size="icon">
-                                    <ShoppingCart className="h-5 w-5"/>
-                                </Button>
-                            </Link>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
